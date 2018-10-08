@@ -100,8 +100,10 @@ export class Car extends Shape {
         let y = this.posY;
         this._moveInterval = setInterval(() => {
             const h = this.heading;
-            x = x + Math.round(sign * this._moveIntervalSteps * Math.sin(Math.PI / 180 * h));
-            y = y + Math.round(-sign * this._moveIntervalSteps * Math.cos(Math.PI / 180 * h));
+            x = x + sign * this._moveIntervalSteps * Math.sin(Math.PI / 180 * h);
+            y = y + -sign * this._moveIntervalSteps * Math.cos(Math.PI / 180 * h);
+            x = Math.round(x * 100) / 100;
+            y = Math.round(y * 100) / 100;
             this.setPosXY(x, y);
         }, this._moveIntervalTimer);
     }
