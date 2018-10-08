@@ -34,12 +34,18 @@ export class GameCanvas {
         return this._car;
     }
 
+    /**
+     * draws the game board
+     */
     draw() {
         this.clearCanvas();
         this.drawBoundaryWarning();
         this.drawCar();
     }
 
+    /**
+     * draws the car
+     */
     drawCar() {
         const car = this.car;
         this._ctx.save();
@@ -89,6 +95,9 @@ export class GameCanvas {
         }
     }
 
+    /**
+     * clears the main canvas
+     */
     clearCanvas() {
         this._ctx.save();
         this._ctx.fillStyle = 'lightGrey';

@@ -1,41 +1,23 @@
 import { Observable } from 'rxjs';
+import { Shape } from './shape';
 
-export class Car {
-    // car width
-    private _width = 20;
+export class Car extends Shape {
 
-    // car height;
-    private _height = 100;
-
-    // maximum valid x value
-    private _limitX = null;
-    get limitX(): number {
-        return this._limitX;
-    }
-    set limitX(lx) {
-        this._limitX = lx;
-    }
-
-    // maximum valid y valu
-    private _limitY = null;
-    get limitY(): number {
-        return this._limitY;
-    }
-    set limitY(ly) {
-        this._limitY = ly;
-    }
-
-    // car x position
-    private _posX = 0;
-
-    // car y position
-    private _posY = 0;
 
     // car heading direction
     private _heading = 0;
+    get heading(): number {
+        return this._heading;
+    }
 
     // car speed in pixels in second
     private _speed = 100;
+    get speed(): number {
+        return this._speed;
+    }
+    set speed(speed) {
+        this._speed = speed;
+    }
 
     private _turnInterval = null;
     private _turnIntervalTimer = 50; // turn interval timer in milliseconds
@@ -50,49 +32,14 @@ export class Car {
     private _observable = Observable.create(observer => this._observer = observer);
 
     constructor(width, height) {
-        this._width = width;
-        this._height = height;
+        super(width, height);
         this.initPos();
-    }
-
-    get width(): number {
-        return this._width;
-    }
-
-    get height(): number {
-        return this._height;
-    }
-
-    get speed(): number {
-        return this._speed;
-    }
-
-    set speed(speed) {
-        this._speed = speed;
-    }
-
-    get posX(): number {
-        return this._posX;
-    }
-
-    get posY(): number {
-        return this._posY;
-    }
-
-    get heading(): number {
-        return this._heading;
-    }
-
-    private setPosX(posX) {
-        this._posX = posX;
-    }
-
-    private setPosY(posY) {
-        this._posY = posY;
     }
 
     private setHeading(heading) {
         this._heading = heading;
+        console.log(`shape heading to ${heading}°`);
+        this._observer.next();
     }
 
     /**
@@ -103,36 +50,16 @@ export class Car {
         this.setPosY(this.height / 2);
     }
 
-    /**
-     * checks if car position is within the border
-     * @param posX x position pixel
-     * @param posY y position pixel
-     * @param heading heading angle
-     */
-    isPosValid(posX: number, posY: number, heading: number): boolean {
-        if (this.limitX && (posX < 0 || posX > this.limitX)) {
-            return false;
-        }
-
-        if (this.limitY && (posY < 0 || posY > this.limitY)) {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * sets the cars (x, y) position and heading
      * @param x car x position
      * @param y car y position
-     * @param h car heading angle
      */
-    moveTo(x = this.posX, y= this.posY, h= this.heading): boolean {
-        if (this.isPosValid(x, y, h)) {
-            this.setPosX(x);
-            this.setPosY(y);
-            this.setHeading(h);
-            console.log(`car moved to x=${x} y= ${y} h=${h}`);
+    protected setPosXY(x: number, y: number): boolean {
+        if (super.setPosXY(x, y)) {
             this._observer.next();
+            return true;
         }
 
         return false;
@@ -175,7 +102,7 @@ export class Car {
             const h = this.heading;
             x = x + Math.round(sign * this._moveIntervalSteps * Math.sin(Math.PI / 180 * h));
             y = y + Math.round(-sign * this._moveIntervalSteps * Math.cos(Math.PI / 180 * h));
-            this.moveTo(x, y, undefined);
+            this.setPosXY(x, y);
         }, this._moveIntervalTimer);
     }
 
@@ -216,7 +143,7 @@ export class Car {
         this._turnInterval = setInterval(() => {
             h = (h + sign * this._turnIntervalSteps) % 360;
             h = (h < 0) ? 360 + h : h;
-            this.moveTo(undefined, undefined, h);
+            this.setHeading(h);
         }, this._turnIntervalTimer);
     }
 
