@@ -36,6 +36,10 @@ export class Car extends Shape {
         this.initPos();
     }
 
+    getCorners(): Array<number> {
+        return [];
+    }
+
     private setHeading(heading) {
         this._heading = heading;
         console.log(`shape heading to ${heading}°`);

@@ -1,3 +1,4 @@
+import * as polyIntersect from 'polygons-intersect';
 export abstract class Shape {
     // shape width
     private _width = 20;
@@ -79,5 +80,13 @@ export abstract class Shape {
         }
 
         return false;
+    }
+
+    abstract getCorners(): Array<number>;
+
+    intersects (shape: Shape): boolean {
+        const poly1 = this.getCorners();
+        const poly2 = shape.getCorners();
+        return polyIntersect(poly1, poly2).length;
     }
 }

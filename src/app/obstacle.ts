@@ -4,4 +4,7 @@ export class Obstacle extends Shape {
         super(width, height);
     }
 
+    getCorners(): Array<number> {
+        return [];
+    }
 }
