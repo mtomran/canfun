@@ -1,4 +1,5 @@
 import * as polyIntersect from 'polygons-intersect';
+
 export abstract class Shape {
     // shape width
     private _width = 30;
@@ -18,7 +19,7 @@ export abstract class Shape {
         return this._limitX;
     }
 
-    // maximum valid y valu
+    // maximum valid y value
     private _limitY = null;
     get limitY(): number {
         return this._limitY;
@@ -45,10 +46,18 @@ export abstract class Shape {
         return this._onMoveEvent;
     }
 
+    /**
+     * sets x position of the shape
+     * @param posX x position
+     */
     protected setPosX(posX) {
         this._posX = posX;
     }
 
+    /**
+     * sets y position of the shape
+     * @param posY y position
+     */
     protected setPosY(posY) {
         this._posY = posY;
     }
@@ -97,13 +106,39 @@ export abstract class Shape {
         }
     }
 
-    abstract getCorners(): Array<number>;
+    /**
+     * get corners of the shape
+     * @return [Array<number>] returns corner (x, y) points in a flat array
+     */
+    getCorners(): Array<number> {
+        const x1 = this.posX - this.width / 2;
+        const y1 = this.posY - this.height / 2;
+        const x2 = this.posX + this.width / 2;
+        const y2 = this.posY - this.height / 2;
+        const x3 = this.posX + this.width / 2;
+        const y3 = this.posY + this.height / 2;
+        const x4 = this.posX - this.width / 2;
+        const y4 = this.posY + this.height / 2;
+        return [x1, y1, x2, y2, x3, y3, x4, y4];
+    }
 
     abstract initPos(): void;
 
-    intersects (shape: Shape): boolean {
-        const poly1 = this.getCorners();
-        const poly2 = shape.getCorners();
-        return polyIntersect(poly1, poly2).length;
+    /**
+     * calculates intersection points of the shape with another shape
+     * @param shape input shape to calculate the intersection with
+     * @return [Array<number>] returns the intersection points
+     */
+    intersection (shape: Shape): Array<number> {
+        const intersect = [];
+        const p1 = this.getCorners();
+        const p2 = shape.getCorners();
+        const obj1 = [{x: p1[0], y: p1[1]}, {x: p1[2], y: p1[3]}, {x: p1[4], y: p1[5]}, {x: p1[6], y: p1[7]}];
+        const obj2 = [{x: p2[0], y: p2[1]}, {x: p2[2], y: p2[3]}, {x: p2[4], y: p2[5]}, {x: p2[6], y: p2[7]}];
+        polyIntersect(obj1, obj2).forEach(point => {
+            intersect.push(point.x);
+            intersect.push(point.y);
+        });
+        return intersect;
     }
 }

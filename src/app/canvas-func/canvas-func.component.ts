@@ -11,7 +11,6 @@ import {HostListener} from '@angular/core';
   styleUrls: ['./canvas-func.component.css']
 })
 export class CanvasFuncComponent implements OnInit {
-
   private _gameCanvas: GameCanvas;
 
   get gameCanvas(): GameCanvas {

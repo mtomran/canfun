@@ -1,15 +1,18 @@
 import { Car } from './car';
 import { Obstacle } from './obstacle';
 import { Parking } from './parking';
+import { Shape } from './shape';
 
 export class GameCanvas {
     _ctx: CanvasRenderingContext2D;
 
+    // car object
     _car: Car;
     get car(): Car {
         return this._car;
     }
 
+    // parking object
     _parking: Parking;
     get parking(): Parking {
         return this._parking;
@@ -21,6 +24,7 @@ export class GameCanvas {
         return this._obstacleCount;
     }
 
+    // array of obstacle objects
     _obstacles: Array<Obstacle>;
     get obstacles(): Array<Obstacle> {
         return this._obstacles;
@@ -32,18 +36,33 @@ export class GameCanvas {
         return this._obstacleLength;
     }
 
+    // winning status of the game
+    _winner = false;
+    get winner(): boolean {
+        return this._winner;
+    }
+
+    // number of remaining lives to play
+    _lifeCount = 10;
+    get lifeCount(): number {
+        return this._lifeCount;
+    }
+
     // size of margin for showing border line warning
     _boundaryWarningThreshold = 10;
 
+    // gets width of the board
     get width(): number {
         return this._ctx.canvas.width;
     }
 
+    // gets height of the board
     get height(): number {
         return this._ctx.canvas.height;
     }
 
     constructor(elementId: string) {
+        // initialize canvas context
         const canvasElm = <HTMLCanvasElement>document.getElementById(elementId);
         if (canvasElm && canvasElm.getContext) {
             const ctx = canvasElm.getContext('2d');
@@ -56,26 +75,58 @@ export class GameCanvas {
             throw new Error('Canvas HTML element not found.');
         }
 
+        // initialize car object
         this._car = new Car({
             limitX: this.width,
             limitY: this.height,
             onMoveEvent: () => {
-                console.log('car moved. now drawing');
+                this.checkStatus();
                 this.draw();
             }
         });
 
+        // initialize obstacles
         this._obstacles = this.generateObstacles();
+
+        // initialize parking object
         this._parking = new Parking({
             width: this.car.width + 10,
             height: this.car.height + 10,
             limitX: this.width,
             limitY: this.height,
         });
+
+        // initialize parking position
         this.parking.initPos();
+
+        // initialize car position
         this.car.initPos();
     }
 
+    /**
+     * checks the status of the game upon movement
+     */
+    checkStatus() {
+        // check if car is in the parking
+        if (this.parking.isInside(this.car)) {
+            this._winner = true;
+
+            // turn off the car if won the game
+            this.car.engineOn = false;
+        }
+
+        // check if any of the obstacles was hit
+        this.obstacles.forEach(obstacle => {
+            if (obstacle.intersection(this.car).length > 0) {
+                this._lifeCount--;
+            }
+        });
+
+        // turn off the car if game is lost
+        if (this.lifeCount < 1) {
+            this.car.engineOn = false;
+        }
+    }
 
 
     /**
@@ -84,8 +135,8 @@ export class GameCanvas {
     draw() {
         this.clearCanvas();
         this.drawBoundaryWarning();
-        this.drawCar();
         this.drawObstacles();
+        this.drawCar();
         this.drawParking();
     }
 
@@ -95,19 +146,19 @@ export class GameCanvas {
     drawCar() {
         const car = this.car;
         this._ctx.save();
-        // draw rectangle
-        const w = car.width;
-        const h = car.height;
 
         // translate and rotate coordinate
         this._ctx.translate(car.posX, car.posY);
         this._ctx.rotate((Math.PI / 180) * car.heading);
 
-        const x = -w / 2;
-        const y = - h / 2;
-        this._ctx.fillRect(x, y, w, h);
+        // draw rectangle
+        this.drawShapeRect(car);
 
         // draw triangle
+        const w = car.width;
+        const h = car.height;
+        const x = -w / 2;
+        const y = - h / 2;
         this._ctx.fillStyle = 'red';
         this._ctx.beginPath();
         this._ctx.moveTo(x, y + h);
@@ -119,14 +170,14 @@ export class GameCanvas {
         this._ctx.restore();
     }
 
+    /**
+     * draws the parking
+     */
     drawParking() {
         this._ctx.save();
         this._ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-        const x = this.parking.posX;
-        const y = this.parking.posY;
-        const w = this.parking.width;
-        const h = this.parking.height;
-        this._ctx.fillRect(x, y, w, h);
+        this._ctx.translate(this.parking.posX, this.parking.posY);
+        this.drawShapeRect(this.parking);
         this._ctx.restore();
     }
 
@@ -134,16 +185,25 @@ export class GameCanvas {
      * draws obstacles in the context
      */
     drawObstacles(): void {
-        this._ctx.save();
-        this._ctx.fillStyle = 'purple';
         this.obstacles.forEach(obstacle => {
-            const x = obstacle.posX;
-            const y = obstacle.posY;
-            const w = obstacle.width;
-            const h = obstacle.height;
-            this._ctx.fillRect(x, y, w, h);
+            this._ctx.save();
+            this._ctx.fillStyle = 'purple';
+            this._ctx.translate(obstacle.posX, obstacle.posY);
+            this.drawShapeRect(obstacle);
+            this._ctx.restore();
         });
-        this._ctx.restore();
+    }
+
+    /**
+     * draws a rectangle for a given shape
+     * @param shape shape to be drawn
+     */
+    drawShapeRect(shape: Shape): void {
+        const w = shape.width;
+        const h = shape.height;
+        const x = -w / 2;
+        const y = -h / 2;
+        this._ctx.fillRect(x, y, w, h);
     }
 
     /**
@@ -187,7 +247,7 @@ export class GameCanvas {
         const stepX = this.width / len;
         const stepY = this.height / len;
 
-        // generating obstacles inside a smaller squares for better distribution
+        // generating randomly positioned obstacles inside smaller squares for better distribution
         for (let i = 0; i < len; ++i) {
             for (let j = 0; j < len; ++j) {
                 if ( (i === 0 && j === 0) || (i === len - 1 && j === len - 1)) {
@@ -197,27 +257,10 @@ export class GameCanvas {
                     width: this.obstacleLength,
                     height: this.obstacleLength
                 });
-                const x = this.generateObstaclePos(i, stepX);
-                const y = this.generateObstaclePos(j, stepY);
-                obstacle.setPosXY(x, y);
+                obstacle.generateObstaclePosXY(i, j, stepX, stepY);
                 obstacles.push(obstacle);
             }
         }
         return obstacles;
-    }
-
-    generateObstaclePos(index: number, step: number): number {
-        const l = index * step;
-        const h = (index + 1) * step;
-        return this.randomRange(l, h) - this.obstacleLength / 2;
-    }
-
-    /**
-     * returns a random number in a given range
-     * @param l low range
-     * @param h high range
-     */
-    randomRange(l: number, h: number): number {
-        return Math.random() * (h - l) + l;
     }
 }

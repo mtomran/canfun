@@ -18,6 +18,15 @@ export class Car extends Shape {
         this._speed = speed;
     }
 
+    // engine on/off status
+    private _engineOn = true;
+    get engineOn(): boolean {
+        return this._engineOn;
+    }
+    set engineOn(state) {
+        this._engineOn = state;
+    }
+
     private _turnInterval = null;
     private _turnIntervalTimer = 50; // turn interval timer in milliseconds
     private _turnIntervalSteps = 5; // turn steps in degrees
@@ -30,25 +39,55 @@ export class Car extends Shape {
         super(options);
     }
 
+    /**
+     * get corners of the car
+     * @return [Array<number>] returns corner (x, y) points in a flat array
+     */
     getCorners(): Array<number> {
-        return [];
+        const rad = Math.PI / 180 * this.heading;
+        const px1 = this.height / 2 * Math.sin(rad);
+        const px2 = this.width / 2 * Math.cos(rad);
+        const py1 = this.height / 2 * Math.cos(rad);
+        const py2 = this.width / 2 * Math.sin(rad);
+        const x1 = this.posX + px1 - px2;
+        const y1 = this.posY - py1 - py2;
+        const x2 = this.posX + px1 + px2;
+        const y2 = this.posY - py1 + py2;
+        const x3 = this.posX - px1 + px2;
+        const y3 = this.posY + py1 + py2;
+        const x4 = this.posX - px1 - px2;
+        const y4 = this.posY + py1 - py2;
+        return [x1, y1, x2, y2, x3, y3, x4, y4];
     }
 
+    /**
+     * sets the heading value of the care
+     * @param heading heading value in degrees
+     */
     private setHeading(heading) {
-        this._heading = heading;
-        console.log(`shape heading to ${heading}°`);
-        this.onMoveEvent();
+        if (this.engineOn) {
+            this._heading = heading;
+            console.log(`shape heading to ${heading}°`);
+            this.onMoveEvent();
+        } else {
+            console.warn('Cannot move! Engine is OFF.');
+        }
     }
 
     /**
      * initializes car position
      */
     initPos() {
-        // this.setPosX(this.width / 2);
-        // this.setPosY(this.height / 2);
         this.setPosXY(this.width / 2, this.height / 2);
     }
 
+    setPosXY(posX: number, posY: number): void {
+        if (this.engineOn) {
+            super.setPosXY(posX, posY);
+        } else {
+            console.warn('Cannot move! Engine is OFF.');
+        }
+    }
 
     /**
      * starts moving forward
@@ -134,5 +173,4 @@ export class Car extends Shape {
         clearInterval(this._turnInterval);
         this._turnInterval = null;
     }
-
 }
