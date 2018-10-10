@@ -1,9 +1,8 @@
 import { Observable } from 'rxjs';
 import { Shape } from './shape';
+import { FunctionCall } from '@angular/compiler';
 
 export class Car extends Shape {
-
-
     // car heading direction
     private _heading = 0;
     get heading(): number {
@@ -27,13 +26,8 @@ export class Car extends Shape {
     private _moveIntervalTimer = 50; // move interval timer in milliseconds
     private _moveIntervalSteps = this._speed * this._moveIntervalTimer / 1000; // move steps in pixels
 
-    private _observer;
-
-    private _observable = Observable.create(observer => this._observer = observer);
-
-    constructor(width, height) {
-        super(width, height);
-        this.initPos();
+    constructor(options) {
+        super(options);
     }
 
     getCorners(): Array<number> {
@@ -43,38 +37,18 @@ export class Car extends Shape {
     private setHeading(heading) {
         this._heading = heading;
         console.log(`shape heading to ${heading}°`);
-        this._observer.next();
+        this.onMoveEvent();
     }
 
     /**
      * initializes car position
      */
     initPos() {
-        this.setPosX(this.width / 2);
-        this.setPosY(this.height / 2);
+        // this.setPosX(this.width / 2);
+        // this.setPosY(this.height / 2);
+        this.setPosXY(this.width / 2, this.height / 2);
     }
 
-
-    /**
-     * sets the cars (x, y) position and heading
-     * @param x car x position
-     * @param y car y position
-     */
-    protected setPosXY(x: number, y: number): boolean {
-        if (super.setPosXY(x, y)) {
-            this._observer.next();
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * returns movement event observable
-     */
-    onMoveEvent(): Observable<void> {
-        return this._observable;
-    }
 
     /**
      * starts moving forward

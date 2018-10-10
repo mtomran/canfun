@@ -11,12 +11,8 @@ import {HostListener} from '@angular/core';
   styleUrls: ['./canvas-func.component.css']
 })
 export class CanvasFuncComponent implements OnInit {
-  private _car = new Car(30, 80);
-  private _gameCanvas: GameCanvas;
 
-  get car(): Car {
-    return this._car;
-  }
+  private _gameCanvas: GameCanvas;
 
   get gameCanvas(): GameCanvas {
     return this._gameCanvas;
@@ -25,55 +21,53 @@ export class CanvasFuncComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this._gameCanvas = new GameCanvas('canvas-func', this._car);
-    this.car.limitX = this._gameCanvas.width;
-    this.car.limitY = this._gameCanvas.height;
-    this.draw();
+    // initialized on component initialization to make sure element is in DOM
+    this._gameCanvas = new GameCanvas('canvas-func');
   }
 
-  draw() {
-    this.gameCanvas.draw();
-    this.car.onMoveEvent()
-    .subscribe(() => {
-      console.log('car moved. now drawing');
-      this.gameCanvas.draw();
-    });
-  }
 
+  /**
+   * handles keydown event to start car movement
+   * @param event keydown even
+   */
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     console.log('Start', event, event.key);
     switch (event.key) {
       case 'ArrowUp':
-        this._car.startForwardMove();
+        this.gameCanvas.car.startForwardMove();
         break;
       case 'ArrowDown':
-        this._car.startBackwardMove();
+        this.gameCanvas.car.startBackwardMove();
         break;
       case 'ArrowRight':
-        this._car.startRightTurn();
+        this.gameCanvas.car.startRightTurn();
         break;
       case 'ArrowLeft':
-        this._car.startLeftTurn();
+        this.gameCanvas.car.startLeftTurn();
         break;
     }
   }
 
+  /**
+   * handles keyup event to stop car movement
+   * @param event keyup even
+   */
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) {
     console.log('End', event.key);
     switch (event.key) {
       case 'ArrowUp':
-        this._car.stopMove();
+        this.gameCanvas.car.stopMove();
         break;
       case 'ArrowDown':
-        this._car.stopMove();
+        this.gameCanvas.car.stopMove();
         break;
       case 'ArrowRight':
-        this._car.stopTurn();
+        this.gameCanvas.car.stopTurn();
         break;
       case 'ArrowLeft':
-        this._car.stopTurn();
+        this.gameCanvas.car.stopTurn();
         break;
     }
   }

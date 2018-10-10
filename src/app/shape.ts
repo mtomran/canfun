@@ -1,13 +1,13 @@
 import * as polyIntersect from 'polygons-intersect';
 export abstract class Shape {
     // shape width
-    private _width = 20;
+    private _width = 30;
     get width(): number {
         return this._width;
     }
 
     // shape height;
-    private _height = 100;
+    private _height = 80;
     get height(): number {
         return this._height;
     }
@@ -17,17 +17,11 @@ export abstract class Shape {
     get limitX(): number {
         return this._limitX;
     }
-    set limitX(lx) {
-        this._limitX = lx;
-    }
 
     // maximum valid y valu
     private _limitY = null;
     get limitY(): number {
         return this._limitY;
-    }
-    set limitY(ly) {
-        this._limitY = ly;
     }
 
     // shape x position
@@ -42,6 +36,15 @@ export abstract class Shape {
         return this._posY;
     }
 
+    // on move event handler
+    private _onMoveEvent;
+    set onMoveEvent(callback) {
+        this._onMoveEvent = callback;
+    }
+    get onMoveEvent() {
+        return this._onMoveEvent;
+    }
+
     protected setPosX(posX) {
         this._posX = posX;
     }
@@ -50,9 +53,12 @@ export abstract class Shape {
         this._posY = posY;
     }
 
-    constructor(width: number, height: number) {
-        this._width = width;
-        this._height = height;
+    constructor(options) {
+        this._width = options.width || this.width;
+        this._height = options.height || this.height;
+        this._limitX = options.limitX || null;
+        this._limitY = options.limitY || null;
+        this._onMoveEvent = options.onMoveEvent || null;
     }
 
     /**
@@ -71,18 +77,29 @@ export abstract class Shape {
         return true;
     }
 
-    protected setPosXY(x: number, y: number): boolean {
+    /**
+     * sets the (x, y) position and calls the event callback
+     * @param x x position pixel
+     * @param y y position pixel
+     */
+    setPosXY(x: number, y: number): void {
         if (this.isPosValid(x, y)) {
             this.setPosX(x);
             this.setPosY(y);
             console.log(`shape moved to x=${x} y= ${y}`);
-            return true;
-        }
 
-        return false;
+            // running on move event callback if provided
+            if (this.onMoveEvent) {
+                this.onMoveEvent();
+            }
+        } else {
+            console.warn(`invalid position: x=${x} y=${y}`);
+        }
     }
 
     abstract getCorners(): Array<number>;
+
+    abstract initPos(): void;
 
     intersects (shape: Shape): boolean {
         const poly1 = this.getCorners();
