@@ -27,13 +27,27 @@ export class Car extends Shape {
         this._engineOn = state;
     }
 
-    private _turnInterval = null;
+    private _turnInterval = null; // holds reference to setInterval for turning
     private _turnIntervalTimer = 50; // turn interval timer in milliseconds
-    private _turnIntervalSteps = 5; // turn steps in degrees
+    get turnIntervalTimer(): number {
+        return this._turnIntervalTimer;
+    }
 
-    private _moveInterval = null;
+    private _turnIntervalSteps = 5; // turn steps in degrees
+    get turnIntervalSteps(): number {
+        return this._turnIntervalSteps;
+    }
+
+    private _moveInterval = null; // holds reference to setInterval for movements
     private _moveIntervalTimer = 50; // move interval timer in milliseconds
+    get moveIntervalTimer(): number {
+        return this._moveIntervalTimer;
+    }
+
     private _moveIntervalSteps = this._speed * this._moveIntervalTimer / 1000; // move steps in pixels
+    get moveIntervalSteps(): number {
+        return this._moveIntervalSteps;
+    }
 
     constructor(options) {
         super(options);
@@ -64,7 +78,7 @@ export class Car extends Shape {
      * sets the heading value of the care
      * @param heading heading value in degrees
      */
-    private setHeading(heading) {
+    setHeading(heading) {
         if (this.engineOn) {
             this._heading = heading;
             console.log(`shape heading to ${heading}°`);
@@ -81,6 +95,11 @@ export class Car extends Shape {
         this.setPosXY(this.width / 2, this.height / 2);
     }
 
+    /**
+     * override car set position method to not run if engine is off
+     * @param posX x position
+     * @param posY y position
+     */
     setPosXY(posX: number, posY: number): void {
         if (this.engineOn) {
             super.setPosXY(posX, posY);
@@ -117,12 +136,12 @@ export class Car extends Shape {
         let y = this.posY;
         this._moveInterval = setInterval(() => {
             const h = this.heading;
-            x = x + sign * this._moveIntervalSteps * Math.sin(Math.PI / 180 * h);
-            y = y + -sign * this._moveIntervalSteps * Math.cos(Math.PI / 180 * h);
+            x = x + sign * this.moveIntervalSteps * Math.sin(Math.PI / 180 * h);
+            y = y + -sign * this.moveIntervalSteps * Math.cos(Math.PI / 180 * h);
             x = Math.round(x * 100) / 100;
             y = Math.round(y * 100) / 100;
             this.setPosXY(x, y);
-        }, this._moveIntervalTimer);
+        }, this.moveIntervalTimer);
     }
 
     /**
@@ -160,10 +179,10 @@ export class Car extends Shape {
         const y = this.posY;
         let h = this.heading;
         this._turnInterval = setInterval(() => {
-            h = (h + sign * this._turnIntervalSteps) % 360;
+            h = (h + sign * this.turnIntervalSteps) % 360;
             h = (h < 0) ? 360 + h : h;
             this.setHeading(h);
-        }, this._turnIntervalTimer);
+        }, this.turnIntervalTimer);
     }
 
     /**

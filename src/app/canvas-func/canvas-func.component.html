@@ -1,7 +1,7 @@
 <canvas id="canvas-func" width="800" height="400"></canvas>
-<h2 *ngIf='gameCanvas.winner'>You Won!!!</h2>
-<h2 *ngIf='gameCanvas.lifeCount < 1'>You lost! Please try again!</h2>
-<p><strong>Life:&nbsp;</strong>{{gameCanvas.lifeCount}}</p>
-<p><strong>X:&nbsp;</strong>{{gameCanvas.car.posX}}</p>
-<p><strong>Y:&nbsp;</strong>{{gameCanvas.car.posY}}</p>
-<p><strong>HEADING:&nbsp;</strong>{{gameCanvas.car.heading}}&#176;</p>
+<h2 class='win-text' *ngIf='gameCanvas.winner'>You Won!!!</h2>
+<h2 class='lose-text' *ngIf='gameCanvas.lifeCount < 1'>You lost! Please try again!</h2>
+<p><strong>Life:&nbsp;</strong><span class='life-count-value'>{{gameCanvas.lifeCount}}</span></p>
+<p><strong>X:&nbsp;</strong><span class='x-pos-value'>{{gameCanvas.car.posX}}</span></p>
+<p><strong>Y:&nbsp;</strong><span class='y-pos-value'>{{gameCanvas.car.posY}}</span></p>
+<p><strong>HEADING:&nbsp;</strong><span class='heading-value'>{{gameCanvas.car.heading}}</span>&#176;</p>

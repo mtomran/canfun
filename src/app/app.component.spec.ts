@@ -1,10 +1,13 @@
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { CanvasFuncComponent } from './canvas-func/canvas-func.component';
+import { Component } from '@angular/core';
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        CanvasFuncComponent
       ],
     }).compileComponents();
   }));
